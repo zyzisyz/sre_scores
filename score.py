@@ -13,6 +13,7 @@ import numpy as np
 import math
 from scipy.spatial import distance
 from scipy import stats as sts
+pi = np.array(np.pi)
 
 def read_trails(path):
     '''
@@ -99,6 +100,35 @@ def euclidean_score(enroll_mats, test_mat):
 
     score = distance.euclidean(enroll_mean, test_mat[0])
     return score
+
+
+
+def Gaussian_log_likelihood(enroll_mats, test_mat):
+    enroll_mats = np.array(enroll_mats, dtype=float)
+    enroll_mean = np.mean(enroll_mats, axis=0)
+    
+    enroll_var = np.var(enroll_mats, axis=0)
+
+    test_mat = np.array(test_mat, dtype=float)
+
+    log_det_sigma = np.log(enroll_var+1e-15).sum()
+    log_probs = -0.5 * ((pow((test_mat-enroll_mean),2)/(enroll_var+1e-15) + np.log(2 * pi) ).sum() + log_det_sigma)
+    return log_probs
+
+
+def score_Gaussian(data, label, mean_class, var_global):
+    logp_index = []
+    lp_tensor_list=[]
+    for i in range(data.size()[0]):
+        log_probs = Gaussian_log_likelihood(data[i], mean_class, var_global)
+        lp_tensor_list.append(log_probs)
+        max_index = torch.argmax(log_probs,dim=0)
+        logp_index.append(max_index)
+    logp_index = torch.cat(logp_index,0)
+    label_mask = torch.eq(label, logp_index).cpu().detach().numpy()
+    logp_accuracy = label_mask.sum() / len(label_mask)
+    logp_scores = torch.cat(lp_tensor_list,0)
+    return logp_accuracy, logp_scores
 
 
 def lda_nl_score(enroll_mats, test_mat, epsilon):

@@ -11,7 +11,7 @@
 # data_prepare
 ######################################
 
-bash data_prepare.sh
+# ./data_prepare.sh
 
 ######################################
 # kaldi cosine score
@@ -19,7 +19,7 @@ bash data_prepare.sh
 time=$(date "+%Y-%m-%d %H:%M:%S")
 echo kaldi start $time
 
-bash kaldi_eer.sh
+./kaldi_eer.sh
 
 time=$(date "+%Y-%m-%d %H:%M:%S")
 echo kaldi end $time
